@@ -1,0 +1,31 @@
+# Sri Sri Ravishankar Teaching #011
+
+## Teaching #011: Anasuya - Devoid of Fault-Finding
+**Date:** August 1995  
+**Location:** Not specified  
+**Topics:** anasuya, fault_finding, knowledge, vision, discrimination, cataract, mirror  
+**Keywords:** anasuya, fault, vision, knowledge, cataract, mirror, royal_secret, consciousness  
+**Problem Categories:** fault_finding, negative_thinking, judgment_issues  
+**Emotional States:** finding_fault, negativity, judgment  
+**Life Situations:** relationships, workplace, general_interactions  
+
+### Content:
+Knowledge will be different at different levels of consciousness. At a particular level of consciousness you will become anasuya. Anasuya is devoid of fault-finding eyes. If a mirror is dusty, you need a duster to clean it. But if your eyes have a cataract, any amount of dusting will not help. So first you have to remove the cataract. Then you can see that the mirror is already clean.
+
+There is a certain mind set that always finds fault, even in the best conditions in the world. When you give a person with this mind set the best, they still find faults. Even with the best possible companion, or the most beautiful painting, they will still find something wrong. That kind of mind set cannot know the sacred Knowledge. Krishna tells Arjuna that he is giving him the Royal Secret, because he is anasuya. "You are not finding fault in Me, even though you are so close."
+
+From a distance, even craters cannot be seen. Even on a smooth surface there will be holes. If you are only interested in the holes, you will not see the magnanimity of things. If you are not in anasuya, Knowledge cannot blossom in you. Then there is no point in giving Knowledge.
+
+**Question:** What about discrimination -- Wisdom?
+
+**Answer:** If it is in your vision, your vision will find discrimination. The moment you are out of the path, everything is all wrong, that is not anasuya. For example, you have a friendship, and after 10 years you decide to leave. When you leave, you do not see the good in that relationship. You find fault. This is not anasuya.
+
+However, once you discover you have the wrong vision, half of the wrong vision has already disappeared. There is a fine line here. There cannot be any better example than the cataract. Instead of saying, "My vision is blurred," you say, "The whole world is not sharp." Suppose someone is coming in. It is windy, so you shut the door. But the person thinks the door has been slammed in his face! This is asuya. It is not anasuya. Most of the population is like this.
+
+Asuya is finding fault. It is seeing malicious intent everywhere. It is like a child who says, "Mother, you don't love me!" The child's vision is wrong. If the mother does not love the child, who will? It is the same as if someone comes and says, "Guruji, you don't love me!" If I don't love them, forget about it. Nobody else in the world will! Where else will they find love? Nowhere. A mother may get frustrated but not a Master.
+
+**Question:** It seems as though you can't have anasuya unless you are enlightened?
+
+**Answer:** Not always. This is an excuse. To get enlightenment, you must have this vision.
+
+---

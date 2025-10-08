@@ -1,0 +1,21 @@
+# Teaching #108: Boredom and Sadhana
+
+**Date:** Recorded before September 5, 2002
+**Location:** Not specified
+**Topics:** boredom, practice, sadhana, love, meditation, self
+**Keywords:** boredom, repetition, practice, abhyasa, self, love, meditation, mind
+**Problem Categories:** boredom, lack_of_interest, spiritual_dryness
+**Emotional States:** bored, disinterested, monotonous
+**Life Situations:** spiritual_practice, meditation, general_guidance
+
+**Content:**
+
+What is boredom?
+
+A repetition without interest or love causes a monotonous state of mind; that is boredom. It overshadows the Self.
+
+A practice or abhyasa is again a repetition whose purpose is to destroy the boredom and reunite with the Self. In this process the practice itself creates boredom and as you continue, it penetrates the boredom and destroys it once and for all. Whether the practice gives you joy or boredom, it must be continued. Only the practice or abhyasa can annihilate the Mind.
+
+Self is Love and Love is always repetitive. That is why love letters are simply repetitive and there is no boredom there. If you are bored with yourself then how much more boring you would be for others. Root out the boredom in you through deep and continued meditation.
+
+Wake up and Walk up.

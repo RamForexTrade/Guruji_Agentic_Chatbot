@@ -1,0 +1,23 @@
+# Sri Sri Ravishankar Teaching #177
+
+## Teaching #177: Appreciation
+**Date:** October 28, 1998  
+**Location:** Vancouver, B.C., Canada  
+**Topics:** appreciation, nature, act, quality, rarity, distance  
+**Keywords:** appreciation, unusual, ordinary, nature, act, quality, rare, separateness, distance, imply  
+**Problem Categories:** understanding_relationships, communication, recognition  
+**Emotional States:** appreciation, separation, recognition  
+**Life Situations:** relationships, communication, recognition  
+
+### Content:
+When do you appreciate someone? When they do something that is unusual, not ordinary, and not their nature. Isn't it so?
+
+For example, when a wicked person doesn't create a problem then you appreciate them. Or, when somebody you think is not good does a good act, then you appreciate them. Also, when a good person does something extraordinary, then you appreciate them. If a child made you a cup of tea, you would appreciate it, but if a mother made the same cup of tea, you would not likely appreciate it because it is a normal act for her. In the same way, you appreciate getting a ride from someone you don't know, but you don't necessarily appreciate it from a bus driver.
+
+In all these cases, those acts are temporary, out of character, or not their nature. So when you appreciate someone for something, you imply that it is not the way they are usually.
+
+Robin: What if a person wants to be appreciated?
+
+Sri Sri: That means that it is not in their nature, and that is why they want to be appreciated. If it is not coming from their nature it is an imposed act. So when you appreciate someone you simply imply that it is not their nature, it is not the way they usually are. It is a rare act or quality. Appreciation implies a sense of separateness or distance, so watch out when you appreciate someone!
+
+---

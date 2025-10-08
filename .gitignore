@@ -1,0 +1,104 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Distribution / packaging
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Environment variables
+.env
+.env.local
+.env.production
+.env.staging
+.env.development
+.env.test
+
+# ChromaDB - Database files (will be regenerated)
+chroma_db/
+*.sqlite3
+*.sqlite3-wal
+*.sqlite3-shm
+*.bin
+
+# Virtual environments
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.venv/
+.virtualenv/
+
+# IDE settings
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.vscode/settings.json
+.vscode/launch.json
+
+# Operating System
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Temporary files
+*.tmp
+*.temp
+tmp/
+temp/
+.cache/
+
+# Cleanup folder
+cleanup/
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Railway
+.railway/
+railway.json
+
+# Local development
+local_test_data/
+dev_data/
+test_data/
+
+# Compressed archives
+*.7z
+*.zip
+*.tar.gz
+*.rar
+
+# Documentation builds
+docs/_build/
+site/
+_build/
+
+# Large files (use Git LFS if needed)
+*.model
+*.h5
+*.pkl
+*.joblib
+
+# API keys and secrets (redundant but safe)
+secrets.yaml
+secrets.json
+api_keys.txt
+
+# Personal notes
+NOTES.md
+TODO_PERSONAL.md
+SCRATCH.md

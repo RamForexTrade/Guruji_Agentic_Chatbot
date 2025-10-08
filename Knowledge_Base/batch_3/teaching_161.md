@@ -1,0 +1,51 @@
+# Sri Sri Ravishankar Teaching #161
+
+## Teaching #161: The Path Of Surrender Is The Path Of Love
+**Date:** July 9, 1998  
+**Location:** Lake Tahoe, California, USA  
+**Topics:** surrender, love, assumption, reality, illusion, choice, destiny  
+**Keywords:** surrender, love, assumption, reality, illusion, krishna, arjuna, beloved, divine, duality, choice, destiny  
+**Problem Categories:** surrender_practice, understanding_love, spiritual_path  
+**Emotional States:** love, surrender, devotion  
+**Life Situations:** spiritual_practice, devotional_path  
+
+### Content:
+Krishna tells Arjuna, "You are very dear to me."
+
+Then Krishna tells Arjuna he must surrender. Surrender begins with an
+
+assumption. First you must assume. You assume you are the most beloved of the
+
+Divine, and then surrender happens.
+
+Surrender is not an action; it is an assumption. Non-surrender is
+
+ignorance. Non-surrender is an illusion. So surrender is an assumption.
+
+Surrender has to begin as an assumption and then it reveals itself as a
+
+reality. Finally, it reveals itself as an illusion. An illusion because there
+
+is no two, no duality.
+
+There is no independent existence of anyone. An individual has no
+
+independent existence. That is it!
+
+Question: Do you have to go through surrender to realize it is an illusion?
+
+Answer: Yes, absolutely.
+
+Question: Where is choice then?
+
+Answer: Choice is your destiny.
+
+Krishna doesn't tell Arjuna in the beginning that he must surrender. First
+
+he says, "You are so dear to me." And then he tells him, " There is no other
+
+choice for you, you must surrender. Either you do it now, or you do it later."
+
+This is the path of love.
+
+---

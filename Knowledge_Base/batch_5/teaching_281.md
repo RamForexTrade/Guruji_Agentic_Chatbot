@@ -1,0 +1,31 @@
+# Sri Sri Ravishankar Teaching #281
+
+## Teaching #281: Sacredness and You
+**Date:** December 1, 2000  
+**Location:** European Ashram, Germany  
+**Topics:** sacredness, symbols, places, time, persons, consciousness  
+**Keywords:** sacredness, sacred, symbols, places, time, persons, consciousness, sensitivity, sadhana, divine  
+**Problem Categories:** understanding_sacredness, spiritual_practice, consciousness  
+**Emotional States:** sacredness, awareness, devotion  
+**Life Situations:** general_guidance, spiritual_practice, sacred_living  
+
+### Content:
+Throughout the ages, in all cultures, place, time, persons and symbols were all considered sacred. Whenever you consider a symbol, place, time, person or act sacred, your attention is undivided and whole. When things are ordinary and same, you tend to slip into unawareness and inertia. The moment you consider something sacred, your inertia disappears and you become more alive. There is nothing as fulfilling as a sacred act. You put your heart and soul in a sacred act. When every action of yours becomes sacred, you have become one with the Divine. Then every minute of your life is sacred, every place you go to becomes sacred, every person you meet is only your reflection, and every act of yours is sacred.
+
+Question: Why does an act when performed repeatedly lose it sacredness?
+
+Sri Sri: This happens when your memory overpowers your consciousness and you lose your sensitivity. For example, people living in Benares do not feel that it is a sacred place. That sensitivity is just not there.
+
+Question: How can we preserve that feeling of sacredness in our acts?
+
+Sri Sri: Through living in the present moment and through Sadhana. Your Sadhana will not allow your memory to overpower consciousness. Repetition is not a hindrance then.
+
+The Native American Indians and the tribals consider the earth, sun, moon and all the directions as sacred. In the ancient tradition, the Rishis considered all the rivers, mountains and even animals, trees and herbs as sacred. What to say of people? They are definitely sacred!
+
+In different parts of the world, certain symbols, certain places and different times of the year are considered sacred. Various cultures honor certain people and consider them as sacred. For example, Christians consider the Cross, Jerusalem, Christmas and the Pope as sacred. For Muslims, the Crescent Moon, Mecca and the month of Ramadan are sacred. The Hindus consider the river Ganges, the Himalayas and the Swamis as sacred.
+
+It is good to begin feeling that some symbols, places, time and people are sacred so that you can be awake and alive. But eventually you need to transcend and feel that the entire creation and your whole life is sacred. For the man of God, the whole world, with all its symbols, places and people are sacred at all times.
+
+BE A MAN OF GOD!
+
+---

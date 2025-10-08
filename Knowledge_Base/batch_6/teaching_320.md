@@ -1,0 +1,37 @@
+# Sri Sri Ravishankar Teaching #320
+
+## Teaching #320: Hungry for Power
+**Date:** August 30, 2001  
+**Location:** Bangalore Ashram, India  
+**Topics:** power, attention, recognition, enlightenment, spirit  
+**Keywords:** power, attention, recognition, talents, love, passion, innocence, enlightenment, spirit, politician  
+**Problem Categories:** understanding_power, ego, spiritual_growth  
+**Emotional States:** craving, strength, confidence, happiness  
+**Life Situations:** career, politics, spiritual_seeking  
+
+### Content:
+Why are people hungry for power?
+
+People are hungry for power because they want attention and recognition.
+
+Power is a means, just like money. Passion is for an end. People who do not see power or money as a means, but see it as an end in itself, they do not live, they simply exist.
+
+If you do not realize that you are THE power -- that is to say that you are enlightened, then you crave for power.
+
+You crave for attention and recognition if:
+
+You don't have any talents,
+You have no love or passion,
+You are not innocent and childlike.
+
+If you don't have any talent and you are not contributing anything substantial to society, like an artist or a scientist, or an Art of Living teacher or volunteer, then you are hungry for power.
+
+If you don't have love or passion to bring about transformation in the society, then you are hungry for power.
+
+If you are not innocent and childlike and don't have a sense of belongingness with the whole world, then you are hungry for power.
+
+Those who do not have any of these four, like some politicians, crave for power.
+
+The true power is the power of the spirit; real confidence, strength and happiness all spring from the spirit. And one who knows this and has this is not hungry for power at all.
+
+---
