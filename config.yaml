@@ -20,7 +20,7 @@ model_provider:
   default: groq
   groq:
     max_tokens: 1500
-    model: llama-3.3-70b-versatile
+    model: openai/gpt-oss-120b #llama-3.3-70b-versatile
     temperature: 0.7
   openai:
     max_tokens: 1500
