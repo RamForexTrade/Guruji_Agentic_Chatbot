@@ -1,29 +1,25 @@
 # Core Framework
-streamlit
-python-dotenv
+streamlit==1.28.0
+python-dotenv==1.0.0
 
-# LangChain and AI - Let pip resolve compatible versions
-langchain
-langchain-openai
-langchain-groq
-langchain-community
-langchain-core
-openai
-groq
+# LangChain - WORKING VERSIONS THAT PLAY NICELY TOGETHER
+langchain==0.1.0
+langchain-openai==0.0.5
+langchain-groq==0.0.1
+langchain-community==0.0.10
+langchain-core==0.1.10
+openai==1.10.0
+groq==0.4.0
 
 # Vector Database
-chromadb
-tiktoken
+chromadb==0.4.22
+tiktoken==0.5.2
 
 # Data Processing
-pyyaml
-pandas
-numpy
+pyyaml==6.0.1
+pandas==2.0.0
+numpy==1.24.0
 
 # Additional Dependencies
-requests
-urllib3
-
-# Optional: Railway/Production
-gunicorn
-psutil
+requests==2.31.0
+urllib3==1.26.18
