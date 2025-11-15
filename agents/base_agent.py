@@ -21,13 +21,7 @@ import logging
 from enum import Enum
 
 from langchain_core.language_models import BaseChatModel
-try:
-    # LangChain 0.1.x+ imports
-    from langchain.agents import AgentExecutor
-    from langchain.agents.openai_functions_agent.base import create_openai_functions_agent
-except ImportError:
-    # Fallback for older versions
-    from langchain.agents import AgentExecutor, create_openai_functions_agent
+from langchain.agents import AgentExecutor, create_tool_calling_agent
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.tools import Tool, StructuredTool
 from langchain_core.messages import BaseMessage, HumanMessage, AIMessage, SystemMessage
@@ -236,9 +230,9 @@ class BaseAgent(ABC):
             ("human", "{input}"),
             MessagesPlaceholder(variable_name="agent_scratchpad"),
         ])
-        
-        # Create agent
-        agent = create_openai_functions_agent(
+
+        # Create agent (using LangChain 0.3.x compatible method)
+        agent = create_tool_calling_agent(
             llm=self.llm,
             tools=self.tools,
             prompt=prompt
