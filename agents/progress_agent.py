@@ -36,8 +36,8 @@ from datetime import datetime, timedelta
 from collections import defaultdict
 import logging
 
-from langchain.prompts import PromptTemplate
-from langchain.schema import BaseMessage
+from langchain_core.prompts import PromptTemplate
+from langchain_core.messages import BaseMessage
 
 from agents.base_agent import BaseAgent, AgentContext, AgentResponse
 from agents.agent_types import (

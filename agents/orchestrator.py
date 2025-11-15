@@ -28,8 +28,8 @@ from typing import Dict, Any, List, Optional
 from datetime import datetime
 import logging
 
-from langchain.tools import Tool
-from langchain.schema import BaseMessage
+from langchain_core.tools import Tool
+from langchain_core.messages import BaseMessage
 
 from agents.base_agent import BaseAgent, AgentContext, AgentResponse
 from agents.agent_types import AgentType, IntentType

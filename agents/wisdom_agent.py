@@ -31,8 +31,9 @@ from datetime import datetime
 import logging
 from pathlib import Path
 
-from langchain.schema import BaseMessage, Document
-from langchain.prompts import PromptTemplate
+from langchain_core.messages import BaseMessage
+from langchain_core.documents import Document
+from langchain_core.prompts import PromptTemplate
 
 from agents.base_agent import BaseAgent, AgentContext, AgentResponse
 from agents.agent_types import AgentType
