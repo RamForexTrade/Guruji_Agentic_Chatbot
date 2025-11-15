@@ -102,3 +102,12 @@ api_keys.txt
 NOTES.md
 TODO_PERSONAL.md
 SCRATCH.md
+
+# Google OAuth tokens (sensitive)
+token.pickle*
+client_secret*.json
+client_secrets.json
+
+# Database files
+database/*.db
+*.db
