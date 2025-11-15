@@ -2,14 +2,14 @@
 streamlit>=1.28.0
 python-dotenv>=1.0.0
 
-# LangChain - Compatible versions
-langchain>=0.1.0
-langchain-openai>=0.0.5
-langchain-groq>=0.0.1
-langchain-community>=0.0.10
-langchain-core>=0.1.10
-openai>=1.10.0
-groq>=0.4.0
+# LangChain - Pinned to stable 0.1.x versions for compatibility
+langchain==0.1.0
+langchain-openai==0.0.5
+langchain-groq==0.0.1
+langchain-community==0.0.10
+langchain-core==0.1.10
+openai==1.10.0
+groq==0.4.0
 
 # Vector Database - Updated for Python 3.11 compatibility
 chromadb>=0.4.22

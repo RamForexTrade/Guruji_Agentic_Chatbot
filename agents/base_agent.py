@@ -21,11 +21,17 @@ import logging
 from enum import Enum
 
 from langchain_core.language_models import BaseChatModel
-from langchain.agents import AgentExecutor, create_openai_functions_agent
-from langchain.prompts import ChatPromptTemplate, MessagesPlaceholder
-from langchain.tools import Tool, StructuredTool
-from langchain.schema import BaseMessage, HumanMessage, AIMessage, SystemMessage
-from langchain.callbacks.base import BaseCallbackHandler
+try:
+    # LangChain 0.1.x+ imports
+    from langchain.agents import AgentExecutor
+    from langchain.agents.openai_functions_agent.base import create_openai_functions_agent
+except ImportError:
+    # Fallback for older versions
+    from langchain.agents import AgentExecutor, create_openai_functions_agent
+from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
+from langchain_core.tools import Tool, StructuredTool
+from langchain_core.messages import BaseMessage, HumanMessage, AIMessage, SystemMessage
+from langchain_core.callbacks import BaseCallbackHandler
 
 from agents.agent_types import (
     AgentType, 
