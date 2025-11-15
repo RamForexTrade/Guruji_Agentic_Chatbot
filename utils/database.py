@@ -767,34 +767,97 @@ class Database:
     def cleanup_old_data(self, days: int = 90):
         """
         Clean up old data (optional maintenance)
-        
+
         Args:
             days: Delete data older than this many days
         """
         conn = self.get_connection()
         cursor = conn.cursor()
-        
+
         try:
             cutoff_date = datetime.now() - timedelta(days=days)
-            
+
             # Delete old conversations
             cursor.execute("""
-                DELETE FROM conversations 
+                DELETE FROM conversations
                 WHERE timestamp < ?
             """, (cutoff_date,))
-            
+
             # Delete old practice logs
             cursor.execute("""
-                DELETE FROM practice_logs 
+                DELETE FROM practice_logs
                 WHERE timestamp < ?
             """, (cutoff_date,))
-            
+
             conn.commit()
             print(f"✅ Cleaned up data older than {days} days")
-            
+
         except Exception as e:
             conn.rollback()
             print(f"❌ Error cleaning up old data: {e}")
+            raise
+        finally:
+            conn.close()
+
+    def delete_user(self, user_id: str):
+        """
+        Delete a user and ALL their associated data
+
+        Args:
+            user_id: The user ID to delete
+        """
+        conn = self.get_connection()
+        cursor = conn.cursor()
+
+        try:
+            # Delete in order due to foreign key constraints
+            # 1. Delete conversations
+            cursor.execute("DELETE FROM conversations WHERE user_id = ?", (user_id,))
+
+            # 2. Delete practice logs
+            cursor.execute("DELETE FROM practice_logs WHERE user_id = ?", (user_id,))
+
+            # 3. Delete user preferences
+            cursor.execute("DELETE FROM user_preferences WHERE user_id = ?", (user_id,))
+
+            # 4. Delete sessions
+            cursor.execute("DELETE FROM sessions WHERE user_id = ?", (user_id,))
+
+            # 5. Finally delete the user
+            cursor.execute("DELETE FROM users WHERE user_id = ?", (user_id,))
+
+            conn.commit()
+            print(f"✅ User {user_id} and all associated data deleted successfully")
+
+        except Exception as e:
+            conn.rollback()
+            print(f"❌ Error deleting user: {e}")
+            raise
+        finally:
+            conn.close()
+
+    def clear_all_data(self):
+        """
+        DANGER: Clear ALL data from the database (all users, conversations, practice logs, etc.)
+        This is irreversible!
+        """
+        conn = self.get_connection()
+        cursor = conn.cursor()
+
+        try:
+            # Delete all data from all tables
+            cursor.execute("DELETE FROM conversations")
+            cursor.execute("DELETE FROM practice_logs")
+            cursor.execute("DELETE FROM user_preferences")
+            cursor.execute("DELETE FROM sessions")
+            cursor.execute("DELETE FROM users")
+
+            conn.commit()
+            print("✅ All data cleared from database")
+
+        except Exception as e:
+            conn.rollback()
+            print(f"❌ Error clearing database: {e}")
             raise
         finally:
             conn.close()

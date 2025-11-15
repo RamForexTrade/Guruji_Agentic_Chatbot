@@ -842,7 +842,75 @@ def render_sidebar(db):
         
         # FIXED: Calendar integration UI
         render_calendar_setup()
-        
+
+        # Database Management
+        st.sidebar.markdown("---")
+        st.sidebar.markdown("### 🗄️ Database Management")
+
+        # Clear chat history
+        if st.sidebar.button("🔄 Clear Chat History", use_container_width=True):
+            st.session_state.messages = []
+            if st.session_state.current_user_id:
+                db.clear_conversation_history(st.session_state.current_user_id)
+            st.sidebar.success("Chat history cleared!")
+            st.rerun()
+
+        # Delete current user
+        if st.sidebar.button("🗑️ Delete My Account", use_container_width=True, type="secondary"):
+            if 'confirm_delete_user' not in st.session_state:
+                st.session_state.confirm_delete_user = False
+
+            if not st.session_state.confirm_delete_user:
+                st.session_state.confirm_delete_user = True
+                st.sidebar.warning("⚠️ Click again to confirm deletion!")
+            else:
+                try:
+                    user_id = st.session_state.current_user_id
+                    db.delete_user(user_id)
+
+                    # Reset session
+                    st.session_state.current_user_id = None
+                    st.session_state.user_profile = None
+                    st.session_state.messages = []
+                    st.session_state.current_assessment = None
+                    st.session_state.current_recommendation = None
+                    st.session_state.confirm_delete_user = False
+
+                    st.sidebar.success("✅ Account deleted!")
+                    st.rerun()
+                except Exception as e:
+                    st.sidebar.error(f"Error: {e}")
+                    st.session_state.confirm_delete_user = False
+
+        # Clear entire database (admin/dev function)
+        st.sidebar.markdown("---")
+        st.sidebar.markdown("#### ⚠️ DANGER ZONE")
+
+        if st.sidebar.button("🗑️ Clear Entire Database", use_container_width=True, type="primary"):
+            if 'confirm_clear_db' not in st.session_state:
+                st.session_state.confirm_clear_db = False
+
+            if not st.session_state.confirm_clear_db:
+                st.session_state.confirm_clear_db = True
+                st.sidebar.error("⚠️⚠️⚠️ DELETES ALL DATA! Click again!")
+            else:
+                try:
+                    db.clear_all_data()
+
+                    # Reset all session state
+                    st.session_state.current_user_id = None
+                    st.session_state.user_profile = None
+                    st.session_state.messages = []
+                    st.session_state.current_assessment = None
+                    st.session_state.current_recommendation = None
+                    st.session_state.confirm_clear_db = False
+
+                    st.sidebar.success("✅ Database cleared!")
+                    st.rerun()
+                except Exception as e:
+                    st.sidebar.error(f"Error: {e}")
+                    st.session_state.confirm_clear_db = False
+
         # Practice logging (if recommendation exists)
         if st.session_state.show_practice_log and st.session_state.current_recommendation:
             render_practice_logging(db)
