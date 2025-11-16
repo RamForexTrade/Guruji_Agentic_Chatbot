@@ -55,11 +55,18 @@ from integrations.actionable_detector import (
     create_practice_from_actionable_step,
     format_actionable_step_for_logging
 )
-from integrations.google_calendar import (
-    GoogleCalendarIntegration,
-    initialize_calendar,
-    format_practice_for_calendar
-)
+# Google Calendar integration disabled for Railway deployment
+try:
+    from integrations.google_calendar import (
+        GoogleCalendarIntegration,
+        initialize_calendar,
+        format_practice_for_calendar
+    )
+    CALENDAR_ENABLED = True
+except (ImportError, ModuleNotFoundError):
+    CALENDAR_ENABLED = False
+    initialize_calendar = None
+    format_practice_for_calendar = None
 
 # Configure page
 st.set_page_config(
@@ -480,13 +487,17 @@ def load_user(user: Dict[str, Any], db):
         })
     st.session_state.messages = messages
     
-    # FIXED: Initialize calendar integration for user
-    try:
-        calendar = initialize_calendar(user['user_id'])
-        st.session_state.calendar_integration = calendar
-        st.session_state.calendar_authenticated = calendar.is_authenticated()
-    except Exception as e:
-        print(f"Calendar initialization error: {e}")
+    # FIXED: Initialize calendar integration for user (if enabled)
+    if CALENDAR_ENABLED:
+        try:
+            calendar = initialize_calendar(user['user_id'])
+            st.session_state.calendar_integration = calendar
+            st.session_state.calendar_authenticated = calendar.is_authenticated()
+        except Exception as e:
+            print(f"Calendar initialization error: {e}")
+            st.session_state.calendar_integration = None
+            st.session_state.calendar_authenticated = False
+    else:
         st.session_state.calendar_integration = None
         st.session_state.calendar_authenticated = False
 
@@ -840,8 +851,9 @@ def render_sidebar(db):
                 else:
                     st.markdown("**Meal Status:** Not collected yet")
         
-        # FIXED: Calendar integration UI
-        render_calendar_setup()
+        # FIXED: Calendar integration UI (if enabled)
+        if CALENDAR_ENABLED:
+            render_calendar_setup()
 
         # Database Management
         st.sidebar.markdown("---")
