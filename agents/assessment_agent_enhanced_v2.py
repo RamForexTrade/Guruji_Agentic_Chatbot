@@ -141,7 +141,7 @@ class EnhancedAssessmentAgentV2(BaseAgent):
     def define_tools(self) -> List:
         """
         Define tools for the agent.
-        V2 doesn't use tools - it's pure conversational.
+        V2 doesn't use tools - it's pure conversational with built-in detection.
         """
         return []
 
@@ -225,15 +225,14 @@ class EnhancedAssessmentAgentV2(BaseAgent):
                     logger.info(f"✓ Age SET to: {detected_age}")
 
             # Detect location from user input
-            # IMPORTANT: Only detect if we were ALREADY in PROBING_LOCATION state at START of turn
-            # This prevents running location detection at wrong times and causing state confusion
+            # ONLY detect when in PROBING_LOCATION state (prevents false positives from emotional talk)
             if state_at_turn_start == ConversationState.PROBING_LOCATION:
                 detected_location = self._quick_detect_location(input_text)
-                logger.info(f"Location detection (in PROBING_LOCATION state): input='{input_text}' -> detected={detected_location.value}")
+                logger.info(f"📍 Location detection (in PROBING_LOCATION state): input='{input_text}' -> detected={detected_location.value}")
 
                 if detected_location != UserLocation.UNKNOWN:
                     assessment.user_location = detected_location
-                    logger.info(f"✓ Location SET to: {detected_location.value}")
+                    logger.info(f"✅ Location SET to: {detected_location.value}")
                 else:
                     logger.info(f"Current location status: {assessment.user_location.value}")
 
@@ -244,49 +243,47 @@ class EnhancedAssessmentAgentV2(BaseAgent):
                         logger.warning(f"⚠️ Location asked {assessment.turns_in_current_state} times without detection. Assuming HOME_INDOOR to prevent loop.")
                         assessment.user_location = UserLocation.HOME_INDOOR
             else:
-                logger.info(f"Location detection skipped (not in PROBING_LOCATION state yet): current_state={state_at_turn_start.value}")
+                logger.info(f"Location detection skipped (not in PROBING_LOCATION state): current_state={state_at_turn_start.value}")
     
             # Detect time available from user input
-            # IMPORTANT: Only detect if we were ALREADY in PROBING_TIME state at START of turn
-            # This prevents running time detection on the same turn as asking the time question
+            # ONLY detect when in PROBING_TIME state (prevents false positives from emotional talk)
             if state_at_turn_start == ConversationState.PROBING_TIME:
                 detected_time = self._detect_time_available(input_text)
-                logger.info(f"Time detection (in PROBING_TIME state): input='{input_text}' -> detected={detected_time.value}")
-    
+                logger.info(f"⏰ Time detection (in PROBING_TIME state): input='{input_text}' -> detected={detected_time.value}")
+
                 if detected_time != TimeAvailable.UNKNOWN:
                     assessment.time_available = detected_time
-                    logger.info(f"✓ Time SET to: {detected_time.value}")
+                    logger.info(f"✅ Time SET to: {detected_time.value}")
                 else:
                     logger.info(f"Current time status: {assessment.time_available.value}")
-    
+
                     # SAFEGUARD: If we've been in PROBING_TIME state for 3+ turns, default to 12 min
                     if (assessment.turns_in_current_state >= 3 and
                         assessment.time_available == TimeAvailable.UNKNOWN):
                         logger.warning(f"⚠️ Time asked {assessment.turns_in_current_state} times without detection. Defaulting to 12_MIN.")
                         assessment.time_available = TimeAvailable.TWELVE_MIN
             else:
-                logger.info(f"Time detection skipped (not in PROBING_TIME state yet): current_state={state_at_turn_start.value}")
+                logger.info(f"Time detection skipped (not in PROBING_TIME state): current_state={state_at_turn_start.value}")
     
             # Detect meal status from user input
-            # IMPORTANT: Only detect if we were ALREADY in PROBING_MEAL state at START of turn
-            # This prevents running meal detection on the same turn as asking the meal question
+            # ONLY detect when in PROBING_MEAL state (prevents false positives from emotional talk)
             if state_at_turn_start == ConversationState.PROBING_MEAL:
                 detected_meal = self._detect_meal_status(input_text)
-                logger.info(f"Meal detection (in PROBING_MEAL state): input='{input_text}' -> detected={detected_meal.value}")
-    
+                logger.info(f"🍽️ Meal detection (in PROBING_MEAL state): input='{input_text}' -> detected={detected_meal.value}")
+
                 if detected_meal != MealStatus.UNKNOWN:
                     assessment.meal_status = detected_meal
-                    logger.info(f"✓ Meal status SET to: {detected_meal.value}")
+                    logger.info(f"✅ Meal status SET to: {detected_meal.value}")
                 else:
                     logger.info(f"Current meal status: {assessment.meal_status.value}")
-    
+
                     # SAFEGUARD: If we've been in PROBING_MEAL state for 3+ turns, default to EMPTY_STOMACH (safer for practices)
                     if (assessment.turns_in_current_state >= 3 and
                         assessment.meal_status == MealStatus.UNKNOWN):
                         logger.warning(f"⚠️ Meal status asked {assessment.turns_in_current_state} times without detection. Defaulting to EMPTY_STOMACH (safer).")
                         assessment.meal_status = MealStatus.EMPTY_STOMACH
             else:
-                logger.info(f"Meal detection skipped (not in PROBING_MEAL state yet): current_state={state_at_turn_start.value}")
+                logger.info(f"Meal detection skipped (not in PROBING_MEAL state): current_state={state_at_turn_start.value}")
     
             # STEP 2: GENERATE LLM response based on UPDATED assessment
             # Build conversation summary
@@ -606,100 +603,194 @@ class EnhancedAssessmentAgentV2(BaseAgent):
 
     def _quick_detect_location(self, text: str) -> UserLocation:
         """
-        LLM-based location detection with keyword fallback.
+        Intelligently detect location from user input with leniency.
         CRITICAL: This prevents infinite loop when user mentions location.
-        Uses LLM to understand context and handle typos/variations.
-
-        IMPORTANT: Keywords must be LOCATION-SPECIFIC phrases to avoid false positives.
-        Generic words like 'work' or 'office' match when user talks ABOUT work problems,
-        not when answering WHERE they are physically located.
+        Uses keywords + LLM to understand context and handle typos/variations.
         """
+        logger.info(f"📍 Location detection: analyzing input='{text}'")
+
         text_lower = text.lower().strip()
 
-        # Quick keyword check first (fast path for common cases)
-        # REMOVED: standalone 'home', 'house', 'work', 'office' - too generic!
-        # ONLY use location-specific phrases like "at home", "in office", etc.
-        home_keywords = ['at home', 'in home', 'from home', 'im home', "i'm home",
+        # STEP 1: Keyword-based detection (fast and reliable)
+        # Location-specific phrases to avoid false positives
+        home_keywords = ['home', 'house', 'at home', 'in home', 'from home', 'im home', "i'm home",
                         'home indoor', 'inside home', 'in my house', 'at my house',
-                        'my home', 'my house', 'home right now', 'at the house']
-        office_keywords = ['at work', 'in office', 'at office', 'in my office',
+                        'my home', 'my house', 'home right now', 'at the house', 'apartment', 'flat']
+
+        office_keywords = ['work', 'office', 'at work', 'in office', 'at office', 'in my office',
                           'at the office', 'in the office', 'at my desk', 'at desk',
-                          'in my cubicle', 'at workplace', 'office right now']
+                          'in my cubicle', 'at workplace', 'office right now', 'workplace']
+
         outdoor_keywords = ['outside', 'outdoor', 'in park', 'at park', 'walking outside',
-                           'in nature', 'in garden', 'at beach', 'outdoors', 'out in nature']
-        public_keywords = ['at cafe', 'in cafe', 'coffee shop', 'at restaurant', 'in restaurant',
+                           'in nature', 'in garden', 'at beach', 'outdoors', 'out in nature', 'garden']
+
+        public_keywords = ['cafe', 'coffee shop', 'restaurant', 'at cafe', 'in cafe', 'at restaurant', 'in restaurant',
                           'at mall', 'in mall', 'at store', 'in store', 'at library', 'in library',
-                          'at gym', 'in gym', 'public place', 'shopping center']
-        vehicle_keywords = ['in car', 'in my car', 'driving', 'in bus', 'in train', 'in vehicle',
-                           'commuting', 'on the road', 'in transit', 'in the car']
+                          'at gym', 'in gym', 'public place', 'shopping center', 'mall', 'gym']
+
+        vehicle_keywords = ['car', 'driving', 'vehicle', 'in car', 'in my car', 'in bus', 'in train', 'in vehicle',
+                           'commuting', 'on the road', 'in transit', 'in the car', 'bus', 'train']
 
         # Check keywords (handles most cases quickly)
         if any(keyword in text_lower for keyword in home_keywords):
+            logger.info(f"✅ Location detection: keyword match → HOME")
+            print(f"\n{'='*60}")
+            print(f"📍 LOCATION DETECTION")
+            print(f"{'='*60}")
+            print(f"User said: '{text}'")
+            print(f"Detected: HOME (keyword match)")
+            print(f"{'='*60}\n")
             return UserLocation.HOME_INDOOR
+
         if any(keyword in text_lower for keyword in office_keywords):
+            logger.info(f"✅ Location detection: keyword match → OFFICE")
+            print(f"\n{'='*60}")
+            print(f"📍 LOCATION DETECTION")
+            print(f"{'='*60}")
+            print(f"User said: '{text}'")
+            print(f"Detected: OFFICE (keyword match)")
+            print(f"{'='*60}\n")
             return UserLocation.OFFICE
+
         if any(keyword in text_lower for keyword in outdoor_keywords):
+            logger.info(f"✅ Location detection: keyword match → OUTDOOR")
+            print(f"\n{'='*60}")
+            print(f"📍 LOCATION DETECTION")
+            print(f"{'='*60}")
+            print(f"User said: '{text}'")
+            print(f"Detected: OUTDOOR (keyword match)")
+            print(f"{'='*60}\n")
             return UserLocation.OUTDOOR
+
         if any(keyword in text_lower for keyword in public_keywords):
+            logger.info(f"✅ Location detection: keyword match → PUBLIC_PLACE")
+            print(f"\n{'='*60}")
+            print(f"📍 LOCATION DETECTION")
+            print(f"{'='*60}")
+            print(f"User said: '{text}'")
+            print(f"Detected: PUBLIC PLACE (keyword match)")
+            print(f"{'='*60}\n")
             return UserLocation.PUBLIC_PLACE
+
         if any(keyword in text_lower for keyword in vehicle_keywords):
+            logger.info(f"✅ Location detection: keyword match → VEHICLE")
+            print(f"\n{'='*60}")
+            print(f"📍 LOCATION DETECTION")
+            print(f"{'='*60}")
+            print(f"User said: '{text}'")
+            print(f"Detected: VEHICLE (keyword match)")
+            print(f"{'='*60}\n")
             return UserLocation.VEHICLE
 
-        # If no keyword match and text is short (likely a location answer), use LLM
-        if len(text.split()) <= 5:  # Short answer, likely location response
-            try:
-                location_prompt = f"""The user was asked where they are physically located.
+        # STEP 2: LLM fallback for complex/short answers
+        try:
+            logger.info(f"📍 Location detection: using LLM fallback")
+            location_prompt = f"""The user was asked where they are physically located.
 They responded: "{text}"
 
 Based on this response, what is their location? Choose ONE:
-- home_indoor (at home, in house, inside)
-- office (at work, workplace, office)
-- outdoor (outside, park, nature, beach)
-- public_place (cafe, restaurant, mall, library, gym)
-- vehicle (in car, bus, train, driving)
-- unknown (unclear or not a location response)
+- home_indoor (at home, in house, inside, apartment, flat)
+- office (at work, workplace, office, desk)
+- outdoor (outside, park, nature, beach, garden)
+- public_place (cafe, restaurant, mall, library, gym, store)
+- vehicle (in car, bus, train, driving, commuting)
+- unknown (ONLY if completely unclear)
 
-Respond with ONLY the location category (e.g., "home_indoor").
-Handle typos and variations (e.g., "homw" = "home_indoor", "wrk" = "office")."""
+Be LENIENT - even short answers like "home" or "work" should be detected. Handle typos (e.g., "homw" = "home_indoor", "wrk" = "office").
 
-                response = self.llm.invoke(location_prompt)
-                detected = response.content.strip().lower()
+Respond with ONLY the location category (e.g., "home_indoor")."""
 
-                # Map LLM response to enum
-                location_map = {
-                    'home_indoor': UserLocation.HOME_INDOOR,
-                    'office': UserLocation.OFFICE,
-                    'outdoor': UserLocation.OUTDOOR,
-                    'public_place': UserLocation.PUBLIC_PLACE,
-                    'vehicle': UserLocation.VEHICLE,
-                    'unknown': UserLocation.UNKNOWN
-                }
+            response = self.llm.invoke(location_prompt)
+            detected = response.content.strip().lower()
 
-                return location_map.get(detected, UserLocation.UNKNOWN)
+            logger.info(f"📍 Location detection: LLM response='{detected}'")
 
-            except Exception as e:
-                logger.error(f"LLM location detection failed: {e}")
-                return UserLocation.UNKNOWN
+            # Map LLM response to enum
+            location_map = {
+                'home_indoor': UserLocation.HOME_INDOOR,
+                'home': UserLocation.HOME_INDOOR,
+                'office': UserLocation.OFFICE,
+                'work': UserLocation.OFFICE,
+                'outdoor': UserLocation.OUTDOOR,
+                'public_place': UserLocation.PUBLIC_PLACE,
+                'vehicle': UserLocation.VEHICLE,
+                'unknown': UserLocation.UNKNOWN
+            }
 
-        return UserLocation.UNKNOWN
+            detected_location = location_map.get(detected, UserLocation.HOME_INDOOR)  # Default to HOME if unclear
+
+            if detected_location != UserLocation.UNKNOWN:
+                logger.info(f"✅ Location detection: LLM mapped to {detected_location.value}")
+            else:
+                logger.info(f"⚠️ Location detection: unclear → defaulting to HOME")
+                detected_location = UserLocation.HOME_INDOOR  # Default to HOME (safer)
+
+            return detected_location
+
+        except Exception as e:
+            logger.error(f"LLM location detection failed: {e}")
+            # Default to HOME for safety
+            return UserLocation.HOME_INDOOR
 
     def _detect_time_available(self, text: str) -> TimeAvailable:
         """
-        Use LLM to detect time available from user input.
-        Much more reliable than keyword matching!
+        Intelligently detect time available from user input.
+        Uses mathematical mapping to find closest valid slot (7, 12, or 20 minutes).
         """
-        logger.info(f"Time detection: analyzing input='{text}'")
+        logger.info(f"⏰ Time detection: analyzing input='{text}'")
 
         try:
-            # Use LLM to understand the response
+            # STEP 1: Try to extract numbers from user input
+            numbers = re.findall(r'\b(\d+)\s*(?:min|minute|minutes)?\b', text.lower())
+
+            if numbers:
+                # Get the first number mentioned (usually the time they have)
+                user_time = int(numbers[0])
+                logger.info(f"⏰ Time detection: extracted number '{user_time}' from input")
+
+                # Valid time slots
+                valid_slots = [7, 12, 20]
+
+                # Find closest valid slot using mathematical distance
+                closest_slot = min(valid_slots, key=lambda x: abs(x - user_time))
+
+                # Calculate how close it is
+                distance = abs(closest_slot - user_time)
+
+                # Log the mapping with visual feedback
+                if distance == 0:
+                    logger.info(f"✅ Time mapping: {user_time} → {closest_slot} min (exact match)")
+                else:
+                    logger.info(f"🔄 Time mapping: {user_time} → {closest_slot} min (distance: {distance} min)")
+
+                # Also print to console for visibility
+                print(f"\n{'='*60}")
+                print(f"⏰ TIME MAPPING TOOL ACTIVATED")
+                print(f"{'='*60}")
+                print(f"User said: '{text}'")
+                print(f"Extracted: {user_time} minutes")
+                print(f"Mapped to: {closest_slot} minutes (closest valid slot)")
+                print(f"Distance: {distance} minutes")
+                print(f"{'='*60}\n")
+
+                # Map to enum
+                if closest_slot == 7:
+                    return TimeAvailable.SEVEN_MIN
+                elif closest_slot == 12:
+                    return TimeAvailable.TWELVE_MIN
+                elif closest_slot == 20:
+                    return TimeAvailable.TWENTY_MIN
+
+            # STEP 2: Fallback to LLM if no number found
+            logger.info(f"⏰ Time detection: no number found, using LLM fallback")
             time_prompt = f"""The user was asked: "How much time do you have right now—7, 12, or about 20 minutes?"
 
 They responded: "{text}"
 
 Based on their response, which time option did they choose?
 - If they said 7 (or seven, or short time, or quick): return "7"
-- If they said 12 (or twelve, or medium time, or 10-15 minutes): return "12"
-- If they said 20 (or twenty, or long time, or 20-30 minutes): return "20"
+- If they said 12 (or twelve, or medium time): return "12"
+- If they said 20 (or twenty, or long time): return "20"
 - If unclear or they didn't answer the question: return "unknown"
 
 Respond with ONLY one word: "7", "12", "20", or "unknown"."""
@@ -707,20 +798,20 @@ Respond with ONLY one word: "7", "12", "20", or "unknown"."""
             response = self.llm.invoke(time_prompt)
             detected = response.content.strip().lower()
 
-            logger.info(f"Time detection: LLM response='{detected}'")
+            logger.info(f"⏰ Time detection: LLM response='{detected}'")
 
             # Map LLM response to enum
             if '7' in detected or 'seven' in detected:
-                logger.info("Time detection: mapped to SEVEN_MIN")
+                logger.info("✅ Time detection: mapped to SEVEN_MIN")
                 return TimeAvailable.SEVEN_MIN
             elif '12' in detected or 'twelve' in detected:
-                logger.info("Time detection: mapped to TWELVE_MIN")
+                logger.info("✅ Time detection: mapped to TWELVE_MIN")
                 return TimeAvailable.TWELVE_MIN
             elif '20' in detected or 'twenty' in detected:
-                logger.info("Time detection: mapped to TWENTY_MIN")
+                logger.info("✅ Time detection: mapped to TWENTY_MIN")
                 return TimeAvailable.TWENTY_MIN
             else:
-                logger.info("Time detection: no clear match → UNKNOWN")
+                logger.info("❌ Time detection: no clear match → UNKNOWN")
                 return TimeAvailable.UNKNOWN
 
         except Exception as e:
@@ -729,43 +820,93 @@ Respond with ONLY one word: "7", "12", "20", or "unknown"."""
 
     def _detect_meal_status(self, text: str) -> MealStatus:
         """
-        Use LLM to detect meal status from user input.
+        Intelligently detect meal status from user input with leniency.
         Important for practice safety - some breathing practices shouldn't be done on full stomach.
         """
-        logger.info(f"Meal detection: analyzing input='{text}'")
+        logger.info(f"🍽️ Meal detection: analyzing input='{text}'")
 
+        text_lower = text.lower().strip()
+
+        # STEP 1: Keyword-based detection (fast and reliable)
+        # Full stomach indicators
+        full_keywords = ['yes', 'yeah', 'yep', 'ate', 'eaten', 'full', 'just ate', 'recently', 'had meal', 'had food', 'finished eating', 'fed']
+
+        # Empty stomach indicators
+        empty_keywords = ['no', 'nope', 'nah', 'not', "haven't", 'havent', 'empty', 'hungry', 'starving', 'didnt eat', "didn't eat", 'no food']
+
+        # Light meal indicators (map to EMPTY for safety - breathing practices are safer)
+        light_keywords = ['slightly', 'a bit', 'little bit', 'small snack', 'light', 'just a little', 'barely', 'tiny bit']
+
+        # Check keywords first
+        if any(keyword in text_lower for keyword in full_keywords):
+            logger.info(f"✅ Meal detection: keyword match → FULL_STOMACH")
+            print(f"\n{'='*60}")
+            print(f"🍽️ MEAL DETECTION")
+            print(f"{'='*60}")
+            print(f"User said: '{text}'")
+            print(f"Detected: FULL STOMACH (keyword match)")
+            print(f"{'='*60}\n")
+            return MealStatus.FULL_STOMACH
+
+        if any(keyword in text_lower for keyword in empty_keywords):
+            logger.info(f"✅ Meal detection: keyword match → EMPTY_STOMACH")
+            print(f"\n{'='*60}")
+            print(f"🍽️ MEAL DETECTION")
+            print(f"{'='*60}")
+            print(f"User said: '{text}'")
+            print(f"Detected: EMPTY STOMACH (keyword match)")
+            print(f"{'='*60}\n")
+            return MealStatus.EMPTY_STOMACH
+
+        if any(keyword in text_lower for keyword in light_keywords):
+            logger.info(f"✅ Meal detection: light meal → EMPTY_STOMACH (safer for practices)")
+            print(f"\n{'='*60}")
+            print(f"🍽️ MEAL DETECTION")
+            print(f"{'='*60}")
+            print(f"User said: '{text}'")
+            print(f"Detected: LIGHT MEAL → Mapped to EMPTY STOMACH")
+            print(f"Reason: Safer for breathing practices")
+            print(f"{'='*60}\n")
+            return MealStatus.EMPTY_STOMACH
+
+        # STEP 2: LLM fallback for complex answers
         try:
-            # Use LLM to understand the response
+            logger.info(f"🍽️ Meal detection: using LLM fallback")
             meal_prompt = f"""The user was asked: "Have you eaten recently?" or "Have you had a meal in the past 2-3 hours?"
 
 They responded: "{text}"
 
 Based on their response, have they eaten recently (full stomach) or not (empty stomach)?
-- If they said yes, or they ate recently, or they're full: return "full"
-- If they said no, or haven't eaten, or hungry, or empty stomach: return "empty"
-- If unclear or they didn't answer: return "unknown"
+- If they said YES, or they ATE RECENTLY, or they're FULL, or had a FULL MEAL: return "full"
+- If they said NO, or HAVEN'T EATEN, or HUNGRY, or EMPTY STOMACH: return "empty"
+- If they had a LIGHT SNACK, SLIGHTLY ate, A BIT, SMALL AMOUNT: return "empty" (safer for breathing practices)
+- Only if COMPLETELY UNCLEAR: return "unknown"
+
+Be LENIENT - if there's any indication of eating or not eating, choose full or empty. Only return unknown if truly impossible to determine.
 
 Respond with ONLY one word: "full", "empty", or "unknown"."""
 
             response = self.llm.invoke(meal_prompt)
             detected = response.content.strip().lower()
 
-            logger.info(f"Meal detection: LLM response='{detected}'")
+            logger.info(f"🍽️ Meal detection: LLM response='{detected}'")
 
             # Map LLM response to enum
             if 'full' in detected:
-                logger.info("Meal detection: mapped to FULL_STOMACH")
+                logger.info("✅ Meal detection: mapped to FULL_STOMACH")
                 return MealStatus.FULL_STOMACH
             elif 'empty' in detected:
-                logger.info("Meal detection: mapped to EMPTY_STOMACH")
+                logger.info("✅ Meal detection: mapped to EMPTY_STOMACH")
                 return MealStatus.EMPTY_STOMACH
             else:
-                logger.info("Meal detection: no clear match → UNKNOWN")
-                return MealStatus.UNKNOWN
+                # Be lenient - default to EMPTY if unclear (safer for practices)
+                logger.info("⚠️ Meal detection: unclear → defaulting to EMPTY_STOMACH (safer)")
+                return MealStatus.EMPTY_STOMACH
 
         except Exception as e:
             logger.error(f"LLM meal detection failed: {e}")
-            return MealStatus.UNKNOWN
+            # Default to EMPTY for safety
+            return MealStatus.EMPTY_STOMACH
 
     def _detect_age(self, text: str) -> Optional[int]:
         """
