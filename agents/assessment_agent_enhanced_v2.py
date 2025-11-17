@@ -685,20 +685,31 @@ class EnhancedAssessmentAgentV2(BaseAgent):
         # STEP 2: LLM fallback for complex/short answers
         try:
             logger.info(f"📍 Location detection: using LLM fallback")
-            location_prompt = f"""The user was asked where they are physically located.
+            location_prompt = f"""The user was asked "Where are you right now?" (asking about their physical location).
 They responded: "{text}"
 
+IMPORTANT: Only detect location if they are DIRECTLY answering the location question.
+- If they're sharing feelings, problems, or continuing emotional conversation, respond "unknown"
+- If they mention work/boss/colleagues in an emotional context (e.g., "My boss is mean"), that's NOT a location answer → "unknown"
+- Only detect location if they're clearly stating WHERE they physically are right now
+
+Examples:
+- "home" → home_indoor
+- "at work" → office
+- "office" → office
+- "My boss is not giving importance to me" → unknown (emotional statement, NOT location answer)
+- "Work is stressful" → unknown (emotional statement, NOT location answer)
+- "I'm at home feeling sad" → home_indoor (clear location stated)
+
 Based on this response, what is their location? Choose ONE:
-- home_indoor (at home, in house, inside, apartment, flat)
-- office (at work, workplace, office, desk)
-- outdoor (outside, park, nature, beach, garden)
-- public_place (cafe, restaurant, mall, library, gym, store)
-- vehicle (in car, bus, train, driving, commuting)
-- unknown (ONLY if completely unclear)
+- home_indoor (ONLY if they clearly state they are at home/house/apartment)
+- office (ONLY if they clearly state they are at work/office)
+- outdoor (ONLY if they clearly state they are outside/park/nature)
+- public_place (ONLY if they clearly state they are at cafe/restaurant/mall/gym)
+- vehicle (ONLY if they clearly state they are in car/bus/train)
+- unknown (if emotional statement, problem-sharing, or unclear)
 
-Be LENIENT - even short answers like "home" or "work" should be detected. Handle typos (e.g., "homw" = "home_indoor", "wrk" = "office").
-
-Respond with ONLY the location category (e.g., "home_indoor")."""
+Respond with ONLY the location category (e.g., "home_indoor" or "unknown")."""
 
             response = self.llm.invoke(location_prompt)
             detected = response.content.strip().lower()
@@ -717,20 +728,19 @@ Respond with ONLY the location category (e.g., "home_indoor")."""
                 'unknown': UserLocation.UNKNOWN
             }
 
-            detected_location = location_map.get(detected, UserLocation.HOME_INDOOR)  # Default to HOME if unclear
+            detected_location = location_map.get(detected, UserLocation.UNKNOWN)  # Return UNKNOWN if not in map
 
             if detected_location != UserLocation.UNKNOWN:
                 logger.info(f"✅ Location detection: LLM mapped to {detected_location.value}")
             else:
-                logger.info(f"⚠️ Location detection: unclear → defaulting to HOME")
-                detected_location = UserLocation.HOME_INDOOR  # Default to HOME (safer)
+                logger.info(f"⚠️ Location detection: user didn't answer location question → UNKNOWN")
 
             return detected_location
 
         except Exception as e:
             logger.error(f"LLM location detection failed: {e}")
-            # Default to HOME for safety
-            return UserLocation.HOME_INDOOR
+            # Return UNKNOWN so bot can ask again
+            return UserLocation.UNKNOWN
 
     def _detect_time_available(self, text: str) -> TimeAvailable:
         """
