@@ -216,7 +216,7 @@ def initialize_agents():
         assessment_agent = EnhancedAssessmentAgentV2(
             llm_provider=assessment_provider,
             model_name=get_model_for_provider(assessment_provider),
-            temperature=0.8,  # Higher for more empathetic, natural responses
+            temperature=1.0,  # OpenAI gpt-5.1-chat-latest only supports temperature=1
             verbose=False
         )
         print(f"✅ Enhanced Assessment Agent initialized ({assessment_provider})")

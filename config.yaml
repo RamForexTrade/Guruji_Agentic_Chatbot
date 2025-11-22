@@ -18,7 +18,7 @@ embeddings:
     dimension: 1536
 model_provider:
   # Default LLM provider: groq, openai, or anthropic
-  default: groq
+  default: openai
 
   # Provider-specific configurations
   groq:
@@ -27,8 +27,8 @@ model_provider:
     max_tokens: 1500
 
   openai:
-    model: gpt-5 #gpt-4o-mini  # Valid OpenAI model
-    temperature: 0.7
+    model: gpt-5.1-chat-latest #gpt-4o-mini  # Valid OpenAI model
+    temperature: 1.0  # gpt-5.1-chat-latest only supports temperature=1
     max_tokens: 1500
 
   anthropic:

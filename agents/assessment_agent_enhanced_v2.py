@@ -119,7 +119,7 @@ class EnhancedAssessmentAgentV2(BaseAgent):
         self,
         llm_provider: Optional[str] = None,
         model_name: Optional[str] = None,
-        temperature: float = 0.8,  # Higher for more empathetic responses
+        temperature: float = 1.0,  # OpenAI gpt-5.1-chat-latest requires temperature=1
         verbose: bool = False
     ):
         """Initialize V2 Assessment Agent"""

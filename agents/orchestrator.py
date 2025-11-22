@@ -73,7 +73,7 @@ class OrchestratorAgent(BaseAgent):
         self,
         llm_provider: Optional[str] = None,
         model_name: Optional[str] = None,
-        temperature: float = 0.7,
+        temperature: float = 1.0,  # OpenAI gpt-5.1-chat-latest requires temperature=1
         verbose: bool = False
     ):
         """
