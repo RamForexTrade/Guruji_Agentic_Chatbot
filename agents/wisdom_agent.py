@@ -579,15 +579,25 @@ Your goal is to make Gurudev's wisdom accessible, relevant, and transformative f
             # Get clean wisdom text
             wisdom_text = response.content.strip()
 
+            # Generate Part 4: Practice section based on the wisdom
+            practice_section = self._generate_practice_section(
+                wisdom_text=wisdom_text,
+                retrieved_wisdom=retrieved_wisdom,
+                user_context=user_context
+            )
+
+            # Combine wisdom + practice
+            full_wisdom = wisdom_text + "\n\n" + practice_section
+
             # Append sources section at the end
-            wisdom_with_sources = self._append_sources_section(wisdom_text, sources, retrieved_wisdom)
+            wisdom_with_sources = self._append_sources_section(full_wisdom, sources, retrieved_wisdom)
 
             return wisdom_with_sources
 
         except Exception as e:
             logger.error(f"Wisdom contextualization failed: {e}")
             # Fallback: return retrieved wisdom with basic formatting
-            return self._format_fallback_wisdom(retrieved_wisdom, sources)
+            return self._format_fallback_wisdom(retrieved_wisdom, sources, user_context)
     
     def _format_sources(self, sources: List[Dict[str, Any]]) -> str:
         """Format sources for citation in the response"""
@@ -602,6 +612,96 @@ Your goal is to make Gurudev's wisdom accessible, relevant, and transformative f
             sources_text.append(source_line)
 
         return "\n".join(sources_text)
+
+    def _generate_practice_section(
+        self,
+        wisdom_text: str,
+        retrieved_wisdom: str,
+        user_context: AgentContext
+    ) -> str:
+        """
+        Generate Part 4: Practice This Wisdom section.
+
+        Creates contextual micro-games, nudges, or actionable practices
+        based on the wisdom teachings retrieved in Part 3.
+
+        Args:
+            wisdom_text: The contextualized wisdom from Part 3
+            retrieved_wisdom: Original retrieved teachings
+            user_context: User's context (age, emotional state, etc.)
+
+        Returns:
+            Formatted Part 4 practice section
+        """
+        try:
+            # Extract user information
+            profile = user_context.user_profile
+            user_name = profile.get('name', 'friend')
+            user_age = profile.get('age', '')
+            user_state = profile.get('emotional_state', '')
+            life_situation = profile.get('life_situation', '')
+
+            # Determine if humor is appropriate
+            sensitive_states = ['grief', 'grieving', 'loss', 'trauma', 'traumatic']
+            use_humor = not any(state in user_state.lower() for state in sensitive_states)
+
+            practice_prompt = f"""Based on the wisdom shared above, create a PART 4: PRACTICE THIS WISDOM section.
+
+User Context:
+- Name: {user_name}
+- Age: {user_age}
+- Emotional State: {user_state}
+- Life Situation: {life_situation}
+- Humor Appropriate: {'Yes' if use_humor else 'No (grief/trauma context)'}
+
+Wisdom Shared (Part 3):
+{wisdom_text}
+
+Original Teachings:
+{retrieved_wisdom}
+
+Instructions:
+Create a brief, actionable "PART 4: PRACTICE THIS WISDOM" section that:
+
+1. **Is directly connected to the teachings above** - Not generic, but specific to what was shared
+2. **Tiny actions (15 seconds to 2 minutes)** - Must be quick and doable right now
+3. **Age-appropriate** - Match the user's age and situation
+4. **Contextual to their emotion** - If anxious, calming. If sad, uplifting. If overwhelmed, grounding.
+5. **Choose ONE format** from:
+   - **Micro-game**: "Right now: Close your eyes, take 3 breaths, and on each exhale silently say 'I release what I cannot control.'"
+   - **Nudge**: "Text yourself one word that describes how you want to feel by tomorrow."
+   - **Emoji check-in**: "Send yourself this emoji that matches where you are emotionally: 😌 calm, 😰 anxious, 😔 heavy, or 🙂 okay."
+   - **Gratitude prompt**: "Name one tiny thing (even just a breath) you're grateful for right now."
+   - **Reflection**: "Write down: What's one belief about this situation I can let go of?"
+   - **Humor-light** (ONLY if appropriate): "Challenge: Find one thing in your space right now that makes you smile, even slightly. Stare at it for 10 seconds."
+
+Format:
+✨ **PART 4: PRACTICE THIS WISDOM**
+
+[One clear, specific action directly tied to the wisdom teachings above. Keep it to 1-2 sentences max. Make it doable RIGHT NOW.]
+
+IMPORTANT:
+- This must be SPECIFIC to the wisdom teachings, not generic
+- Must reference or build on what was shared in Part 3
+- Keep it SHORT (1-2 sentences)
+- Make it immediately actionable
+
+Your response (just the Part 4 section):"""
+
+            # Invoke LLM
+            response = self.llm.invoke(practice_prompt)
+            practice_text = response.content.strip()
+
+            # Ensure it has the Part 4 heading if LLM didn't include it
+            if "PART 4" not in practice_text:
+                practice_text = "✨ **PART 4: PRACTICE THIS WISDOM**\n\n" + practice_text
+
+            return practice_text
+
+        except Exception as e:
+            logger.error(f"Practice section generation failed: {e}")
+            # Fallback to simple actionable reflection
+            return "✨ **PART 4: PRACTICE THIS WISDOM**\n\nTake a moment today to reflect on one insight from above that resonates with you. Let it settle gently in your awareness."
 
     def _append_sources_section(
         self,
@@ -663,25 +763,38 @@ Your goal is to make Gurudev's wisdom accessible, relevant, and transformative f
     def _format_fallback_wisdom(
         self,
         wisdom: str,
-        sources: List[Dict[str, Any]]
+        sources: List[Dict[str, Any]],
+        user_context: AgentContext
     ) -> str:
         """
         Format wisdom as fallback when LLM contextualization fails.
 
-        Provides basic formatting with source citations.
+        Provides basic formatting with Part 4 practice and source citations.
 
         Args:
             wisdom: Retrieved wisdom content
             sources: Source information
+            user_context: User's context
 
         Returns:
-            Formatted wisdom string with sources section
+            Formatted wisdom string with Part 4 and sources section
         """
         fallback = f"""Here is wisdom from Gurudev's teachings:
 
 {wisdom}
 
 May this wisdom bring you clarity and peace. 🙏"""
+
+        # Generate Part 4 even in fallback
+        try:
+            practice_section = self._generate_practice_section(
+                wisdom_text=fallback,
+                retrieved_wisdom=wisdom,
+                user_context=user_context
+            )
+            fallback = fallback + "\n\n" + practice_section
+        except Exception as e:
+            logger.warning(f"Could not generate practice section in fallback: {e}")
 
         # Append sources section using the same method
         return self._append_sources_section(fallback, sources, wisdom)
