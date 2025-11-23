@@ -161,10 +161,13 @@ Instructions:
 2. Be warm, empathetic, and encouraging
 3. Use simple, accessible language
 4. Connect the teachings to their current situation
-5. Cite the teaching numbers in your response (e.g., "As Gurudev shared in Teaching #123...")
-6. Keep the response focused and not too lengthy (3-5 paragraphs)
-7. End with an actionable insight or reflection point
-8. Maintain the authentic voice and essence of Gurudev's teachings
+5. DO NOT cite teaching numbers inline in your response - sources will be listed separately at the end
+6. Write the wisdom in a flowing, narrative style without interrupting with citations
+7. Keep the response focused and not too lengthy (3-5 paragraphs)
+8. End with an actionable insight or reflection point
+9. Maintain the authentic voice and essence of Gurudev's teachings
+
+IMPORTANT: Write clean, flowing wisdom text WITHOUT any inline citations or teaching numbers. The sources will be appended automatically after your response.
 
 Response:"""
         
@@ -494,21 +497,21 @@ Your goal is to make Gurudev's wisdom accessible, relevant, and transformative f
     ) -> Tuple[str, List[Dict[str, Any]]]:
         """
         Extract wisdom content and source information from documents.
-        
+
         Args:
             docs: Retrieved documents
-        
+
         Returns:
             Tuple of (wisdom_content, sources_list)
         """
         wisdom_parts = []
         sources = []
-        
+
         for idx, doc in enumerate(docs):
             # Extract content
             content = doc.page_content
             wisdom_parts.append(f"Teaching {idx + 1}:\n{content}\n")
-            
+
             # Extract source information
             metadata = doc.metadata
             source_info = {
@@ -517,10 +520,11 @@ Your goal is to make Gurudev's wisdom accessible, relevant, and transformative f
                 'date': metadata.get('date', ''),
                 'location': metadata.get('location', ''),
                 'topics': metadata.get('topics', ''),
-                'relevance_rank': idx + 1
+                'relevance_rank': idx + 1,
+                'content': content  # Store actual teaching content for sources section
             }
             sources.append(source_info)
-        
+
         wisdom_content = "\n---\n".join(wisdom_parts)
         return wisdom_content, sources
     
@@ -533,30 +537,30 @@ Your goal is to make Gurudev's wisdom accessible, relevant, and transformative f
     ) -> str:
         """
         Contextualize retrieved wisdom for the user's specific situation.
-        
+
         Uses LLM to synthesize retrieved teachings into a coherent,
         personalized response that addresses the user's query.
-        
+
         Args:
             user_query: Original user query
             retrieved_wisdom: Raw wisdom from retrieved teachings
             sources: Source information for citations
             user_context: User's context
-        
+
         Returns:
-            Contextualized wisdom response
+            Contextualized wisdom response with sources appended
         """
         try:
             # Format sources for citation
             sources_text = self._format_sources(sources)
-            
+
             # Extract user information
             profile = user_context.user_profile
             user_name = profile.get('name', 'friend')
             user_state = profile.get('emotional_state', 'seeking guidance')
             life_situation = profile.get('life_situation', '')
             user_age = profile.get('age', '')
-            
+
             # Generate contextualized response
             prompt_input = {
                 'user_name': user_name,
@@ -567,13 +571,19 @@ Your goal is to make Gurudev's wisdom accessible, relevant, and transformative f
                 'retrieved_wisdom': retrieved_wisdom,
                 'sources': sources_text
             }
-            
+
             # Invoke LLM
             formatted_prompt = self.wisdom_prompt.format(**prompt_input)
             response = self.llm.invoke(formatted_prompt)
-            
-            return response.content.strip()
-            
+
+            # Get clean wisdom text
+            wisdom_text = response.content.strip()
+
+            # Append sources section at the end
+            wisdom_with_sources = self._append_sources_section(wisdom_text, sources, retrieved_wisdom)
+
+            return wisdom_with_sources
+
         except Exception as e:
             logger.error(f"Wisdom contextualization failed: {e}")
             # Fallback: return retrieved wisdom with basic formatting
@@ -582,7 +592,7 @@ Your goal is to make Gurudev's wisdom accessible, relevant, and transformative f
     def _format_sources(self, sources: List[Dict[str, Any]]) -> str:
         """Format sources for citation in the response"""
         sources_text = []
-        
+
         for source in sources:
             source_line = f"- Teaching #{source['teaching_number']}"
             if source.get('title'):
@@ -590,9 +600,66 @@ Your goal is to make Gurudev's wisdom accessible, relevant, and transformative f
             if source.get('date'):
                 source_line += f" ({source['date']})"
             sources_text.append(source_line)
-        
+
         return "\n".join(sources_text)
-    
+
+    def _append_sources_section(
+        self,
+        wisdom_text: str,
+        sources: List[Dict[str, Any]],
+        retrieved_wisdom: str
+    ) -> str:
+        """
+        Append a formatted sources section at the end of the wisdom response.
+
+        Args:
+            wisdom_text: The clean wisdom text without inline citations
+            sources: List of source information dicts
+            retrieved_wisdom: Original retrieved wisdom text
+
+        Returns:
+            Wisdom text with sources section appended
+        """
+        if not sources:
+            return wisdom_text
+
+        # Build sources section
+        sources_section = "\n\n---\n\n**📚 Teachings Referenced:**\n\n"
+
+        for idx, source in enumerate(sources, 1):
+            teaching_num = source.get('teaching_number', 'Unknown')
+            title = source.get('title', 'Untitled')
+            date = source.get('date', '')
+            location = source.get('location', '')
+            content = source.get('content', '')
+
+            # Format each source
+            source_entry = f"**Teaching #{teaching_num}**"
+            if title and title != 'Untitled':
+                source_entry += f": {title}"
+
+            # Add metadata if available
+            metadata_parts = []
+            if date:
+                metadata_parts.append(date)
+            if location:
+                metadata_parts.append(location)
+            if metadata_parts:
+                source_entry += f" ({', '.join(metadata_parts)})"
+
+            source_entry += "\n"
+
+            # Add teaching content (truncate if too long)
+            if content:
+                # Limit content to first 500 characters to keep it readable
+                content_preview = content[:500] + "..." if len(content) > 500 else content
+                source_entry += f"\n{content_preview}\n"
+
+            sources_section += source_entry + "\n"
+
+        # Combine wisdom text with sources
+        return wisdom_text + sources_section
+
     def _format_fallback_wisdom(
         self,
         wisdom: str,
@@ -600,28 +667,24 @@ Your goal is to make Gurudev's wisdom accessible, relevant, and transformative f
     ) -> str:
         """
         Format wisdom as fallback when LLM contextualization fails.
-        
+
         Provides basic formatting with source citations.
-        
+
         Args:
             wisdom: Retrieved wisdom content
             sources: Source information
-        
+
         Returns:
-            Formatted wisdom string
+            Formatted wisdom string with sources section
         """
-        sources_text = self._format_sources(sources)
-        
         fallback = f"""Here is wisdom from Gurudev's teachings:
 
 {wisdom}
 
-Sources:
-{sources_text}
-
 May this wisdom bring you clarity and peace. 🙏"""
-        
-        return fallback
+
+        # Append sources section using the same method
+        return self._append_sources_section(fallback, sources, wisdom)
     
     def _create_fallback_response(
         self,
